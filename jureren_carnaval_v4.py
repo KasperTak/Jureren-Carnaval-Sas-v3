@@ -54,7 +54,7 @@ client = gspread.authorize(creds)
 def df_to_excel_colored(df):
     # Exporteer DataFrame tijdelijk naar BytesIO
     output = BytesIO()
-    wb = Workbook
+    wb = Workbook()
     ws = wb.active
     
     # Stijlen
@@ -110,9 +110,9 @@ def df_to_excel_colored(df):
         row += 1
         
     # kolombreedtes
-    ws.column_dimension["A"].width = 10
-    ws.column_dimension["B"].width = 25
-    ws.column_dimension["C"].width = 90
+    ws.column_dimensions["A"].width = 10
+    ws.column_dimensions["B"].width = 25
+    ws.column_dimensions["C"].width = 90
     
     wb.save(output)
     output.seek(0)
@@ -577,5 +577,6 @@ else:
         else:
             st.info("⏳ Wacht op alle juryleden, of vink 'forceren' aan om toch te berekenen.")
     
+
 
 
