@@ -34,7 +34,14 @@ def init_session():
         "username": None,
         "soort": None,
         "active_tab": "Home",
-        "pending_saves": []
+        "pending_saves": [],
+        
+        "uitslag_berekend" : False,
+        "df_rapport" : None,
+        "df_pers" : None,
+        "Rapport_excel": None,
+        "Pers_excel":None,
+        "mail_verzonden": False
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -532,7 +539,7 @@ else:
         
         if (not missende_juryleden) or st.session_state['soort'] not in ['w', 'g'] or forceer:
             if st.button("📊 Bereken uitslag"):
-                st.info("Uitslag wordt berekend...")
+                # st.info("Uitslag wordt berekend...")
                 
                 kolommen_criteria = ["Idee", "Bouwtechnisch", "Afwerking", "Carnavalesk", "Actie"]
                 df = df_beoordelingen.iloc[1:]
@@ -579,25 +586,53 @@ else:
                 uitslag_top_3_pers = pd.concat([top_3_algemeen, top_3_carnavalesk], ignore_index=True)
                 
                 
-                # hier de berekeningslogica
-
-                excel_buffer = df_to_excel_colored(df_rapport)
-                st.download_button(
-                    label = "Download rapport als Excel-bestand",
-                    data = excel_buffer,
-                    file_name= "uitslag_rapport.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
-                excel_buffer_2 = df_to_excel_colored(uitslag_top_3_pers)
-                st.download_button(
-                    label = "Pers-uitslag",
-                    data = excel_buffer_2,
-                    file_name= "pers_uitslag.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                st.session_state.df_rapport = df_rapport
+                st.session_state.df_pers = uitslag_top_3_pers
+                st.session_state.uitslag_berekend = True
                 
-                if st.button("Verstuur mail met Excelbestand"):
-                    mail_excel(excel_buffer, "test_eindrapport.xlsx")
-                    st.succes("Mail verstuurd!")
+                st.session_state.Rapport_excel = None
+                st.session_state.Pers_excel = None
+                st.session_state.mail_verzonden = False
+                
+                # hier de berekeningslogica
+                if st.session_state.uitslag_berekend:
+                    st.succes("Uitslag is berekend")
+                    
+                    if st.session_state.Rapport_excel is None:
+                        st.session_state.Rapport_excel = df_to_excel_colored(st.session_state.df_rapport)
+                    st.download_button("Download rapport naar Excel", data = st.session_state.Rapport_excel, file_name="uitslag_rapport.xlsx", 
+                                       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                
+                
+                    if st.session_state.Pers_excel is None:
+                        st.session_state.Pers_excel = df_to_excel_colored(st.session_state.df_pers)
+                    st.download_button("Download persuitslag", data=st.session_state.Pers_excel, file_name="pers_uitslag.xlsx",
+                                       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    
+                    
+                # excel_buffer = df_to_excel_colored(df_rapport)
+                # st.download_button(
+                #     label = "Download rapport als Excel-bestand",
+                #     data = excel_buffer,
+                #     file_name= "uitslag_rapport.xlsx",
+                #     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+                # excel_buffer_2 = df_to_excel_colored(uitslag_top_3_pers)
+                # st.download_button(
+                #     label = "Pers-uitslag",
+                #     data = excel_buffer_2,
+                #     file_name= "pers_uitslag.xlsx",
+                #     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                
+                if st.session_state.uitslag_berekend:
+                    if st.button("Verstuur rapport via mail"):
+                        if st.session_state.mail_verzonden:
+                            st.warning("Mail is al verzonden")
+                        else:
+                            mail_excel(st.session_state.Rapport_excel, "Volledig_rapport_uitslag.xlsx")
+                            st.session_state.mail_verzonden = True
+                            st.success("Mail succesvol verzonden!")
+                
 
       
                 
