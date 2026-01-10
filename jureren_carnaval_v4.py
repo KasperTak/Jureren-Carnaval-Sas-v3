@@ -596,7 +596,7 @@ else:
                 
                 # hier de berekeningslogica
                 if st.session_state.uitslag_berekend:
-                    st.succes("Uitslag is berekend")
+                    st.success("Uitslag is berekend")
                     
                     if st.session_state.Rapport_excel is None:
                         st.session_state.Rapport_excel = df_to_excel_colored(st.session_state.df_rapport)
@@ -639,5 +639,6 @@ else:
         else:
             st.info("⏳ Wacht op alle juryleden, of vink 'forceren' aan om toch te berekenen.")
     
+
 
 
