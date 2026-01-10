@@ -565,7 +565,7 @@ else:
                 
                 # hier de berekeningslogica
 
-                excel_buffer = df_to_excel_simpel(df_rapport)
+                excel_buffer = df_to_excel_colored(df_rapport)
                 st.download_button(
                     label = "Download rapport als Excel-bestand",
                     data = excel_buffer,
@@ -584,5 +584,6 @@ else:
         else:
             st.info("⏳ Wacht op alle juryleden, of vink 'forceren' aan om toch te berekenen.")
     
+
 
 
