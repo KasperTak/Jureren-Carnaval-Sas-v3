@@ -51,6 +51,12 @@ client = gspread.authorize(creds)
 # sheet = client.open("Jury_beoordelingen_2026_v1").worksheet("Beoordeling")
 # sheet_top3 = client.open("Jury_beoordelingen_2026_v1").worksheet("LeutigsteDeelnemer")
 #%%
+def df_to_excel_simpel(df):
+    output = BytesIO()
+    df.to_excel(output, index=False, sheet_name="RECAP Beoordelingen")
+    output.seek(0)
+    return output
+#%%
 def df_to_excel_colored(df):
     # Exporteer DataFrame tijdelijk naar BytesIO
     output = BytesIO()
@@ -543,6 +549,7 @@ else:
                 df_uitslag_carnavalesk = df_rapport_categorien.sort_values(by='Carnavalesk', ascending=False).reset_index(drop=True)
                 df_uitslag_carnavalesk['Plaats'] = range(1, len(df_uitslag_carnavalesk) + 1)
                 df_uitslag_carnavalesk['Beoordelingscriterium'] = 'Carnavalesk'
+                df_uitslag_carnavalesk['Categorie'] = 'Carnavalesk'
 
                 df_rapport_carnavalesk = df_uitslag_carnavalesk.copy()
                 df_rapport = pd.concat([df_rapport_categorien, df_rapport_carnavalesk], ignore_index=True)
@@ -558,7 +565,7 @@ else:
                 
                 # hier de berekeningslogica
 
-                excel_buffer = df_to_excel_colored(df_rapport)
+                excel_buffer = df_to_excel_simpel(df_rapport)
                 st.download_button(
                     label = "Download rapport als Excel-bestand",
                     data = excel_buffer,
@@ -577,6 +584,5 @@ else:
         else:
             st.info("⏳ Wacht op alle juryleden, of vink 'forceren' aan om toch te berekenen.")
     
-
 
 
