@@ -595,19 +595,19 @@ else:
                 st.session_state.mail_verzonden = False
                 
                 # hier de berekeningslogica
-                if st.session_state.uitslag_berekend:
-                    st.success("Uitslag is berekend")
-                    
-                    if st.session_state.Rapport_excel is None:
-                        st.session_state.Rapport_excel = df_to_excel_colored(st.session_state.df_rapport)
-                    st.download_button("Download rapport naar Excel", data = st.session_state.Rapport_excel, file_name="uitslag_rapport.xlsx", 
-                                       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            if st.session_state.uitslag_berekend:
+                st.success("Uitslag is berekend")
                 
-                
-                    if st.session_state.Pers_excel is None:
-                        st.session_state.Pers_excel = df_to_excel_colored(st.session_state.df_pers)
-                    st.download_button("Download persuitslag", data=st.session_state.Pers_excel, file_name="pers_uitslag.xlsx",
-                                       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                if st.session_state.Rapport_excel is None:
+                    st.session_state.Rapport_excel = df_to_excel_colored(st.session_state.df_rapport)
+                st.download_button("Download rapport naar Excel", data = st.session_state.Rapport_excel, file_name="uitslag_rapport.xlsx", 
+                                   mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            
+            
+                if st.session_state.Pers_excel is None:
+                    st.session_state.Pers_excel = df_to_excel_colored(st.session_state.df_pers)
+                st.download_button("Download persuitslag", data=st.session_state.Pers_excel, file_name="pers_uitslag.xlsx",
+                                   mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                     
                     
                 # excel_buffer = df_to_excel_colored(df_rapport)
@@ -624,14 +624,14 @@ else:
                 #     file_name= "pers_uitslag.xlsx",
                 #     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                 
-                if st.session_state.uitslag_berekend:
-                    if st.button("Verstuur rapport via mail"):
-                        if st.session_state.mail_verzonden:
-                            st.warning("Mail is al verzonden")
-                        else:
-                            mail_excel(st.session_state.Rapport_excel, "Volledig_rapport_uitslag.xlsx")
-                            st.session_state.mail_verzonden = True
-                            st.success("Mail succesvol verzonden!")
+            if st.session_state.uitslag_berekend:
+                if st.button("Verstuur rapport via mail"):
+                    if st.session_state.mail_verzonden:
+                        st.warning("Mail is al verzonden")
+                    else:
+                        mail_excel(st.session_state.Rapport_excel, "Volledig_rapport_uitslag.xlsx")
+                        st.session_state.mail_verzonden = True
+                        st.success("Mail succesvol verzonden!")
                 
 
       
@@ -639,6 +639,5 @@ else:
         else:
             st.info("⏳ Wacht op alle juryleden, of vink 'forceren' aan om toch te berekenen.")
     
-
 
 
