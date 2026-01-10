@@ -19,6 +19,8 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
 from openpyxl.utils import get_column_letter
+import smtplib
+from email.message import EmailMessage
 icon = Image.open("betekoppen_logo.png")
 st.set_page_config(page_title="Jureren Betekoppen",
                   page_icon=icon,
@@ -51,11 +53,25 @@ client = gspread.authorize(creds)
 # sheet = client.open("Jury_beoordelingen_2026_v1").worksheet("Beoordeling")
 # sheet_top3 = client.open("Jury_beoordelingen_2026_v1").worksheet("LeutigsteDeelnemer")
 #%%
-def df_to_excel_simpel(df):
-    output = BytesIO()
-    df.to_excel(output, index=False, sheet_name="RECAP Beoordelingen")
-    output.seek(0)
-    return output
+def mail_excel(excel_bytes, filename):
+    msg = EmailMessage()
+    msg["Subject"] = "Uitslag carnavalsoptocht Sas van Gent (Betekoppen) 2026"
+    msg["From"] = st.secrets["email"]["from"]
+    msg["To"] = st.secrets["email"]["to"]
+    
+    msg.set_content(
+        "Beste, \n\nAlle onderdelen zijn beoordeeld door de juryleden.\n"
+        "In de bijlage staat het Excelbestand met de uitgebreide uitslagen. Dit is overigens niet de uitslag voor de pers. \n\nGroeten,\nKasper Tak \n\nTelefoonnummer: 06 29927267")
+    msg.add_attachment(excel_bytes.getvalue(),
+                       maintype="application",
+                       subtype="vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                       filename=filename)
+    
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+        smtp.login(
+            st.secrets["email"]["from"],
+            st.secrets["email"]["app_password"])
+        smtp.send_message(msg)
 #%%
 def df_to_excel_colored(df):
     # Exporteer DataFrame tijdelijk naar BytesIO
@@ -79,7 +95,7 @@ def df_to_excel_colored(df):
         bottom = Side(style="thin"))
     row = 1
     
-    for categorie, groep in df.groupby("Categorie", sort=False):
+    for categorie, groep in df.groupby("Categorie", sort = False):
     # Categorie-kop
         ws.cell(row=row, column = 1, value="Categorie").font = bold
         ws.cell(row=row, column = 1).fill = header_fill
@@ -578,13 +594,15 @@ else:
                     data = excel_buffer_2,
                     file_name= "pers_uitslag.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                
+                if st.button("Verstuur mail met Excelbestand"):
+                    mail_excel(excel_buffer, "test_eindrapport.xlsx")
+                    st.succes("Mail verstuurd!")
 
       
                 
         else:
             st.info("⏳ Wacht op alle juryleden, of vink 'forceren' aan om toch te berekenen.")
     
-
-
 
 
