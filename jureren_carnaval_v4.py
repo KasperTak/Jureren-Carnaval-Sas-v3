@@ -65,7 +65,7 @@ def mail_excel(excel_bytes_1, filename_1, excel_bytes_2, filename_2):
     msg["Subject"] = "Uitslag carnavalsoptocht Sas van Gent (Betekoppen) 2026"
     msg["From"] = st.secrets["email"]["from"]
     msg["To"] = st.secrets["email"]["to"]
-    msg["Cc"] = "kasper.tak@gmail.com" #"werloe96@zeelandnet.nl"
+    msg["Cc"] = "kasper.tak@gmail.com", "werloe96@zeelandnet.nl"
     
     msg.set_content(
         "Beste, \n\nAlle onderdelen zijn beoordeeld door de juryleden.\n"
@@ -645,6 +645,7 @@ else:
         else:
             st.info("⏳ Wacht op alle juryleden, of vink 'forceren' aan om toch te berekenen.")
     
+
 
 
 
