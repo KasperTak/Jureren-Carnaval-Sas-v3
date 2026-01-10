@@ -634,13 +634,10 @@ else:
                 
             if st.session_state.uitslag_berekend:
                 if st.button("Verstuur rapport via mail"):
-                    if st.session_state.mail_verzonden:
-                        st.warning("Mail is al verzonden")
-                    else:
-                        mail_excel(st.session_state.Rapport_excel, "Volledig_rapport_uitslag.xlsx",
-                                   st.session_state.Pers_excel, "Persuitslag.xlsx")
-                        st.session_state.mail_verzonden = True
-                        st.success("Mail succesvol verzonden!")
+                    mail_excel(st.session_state.Rapport_excel, "Volledig_rapport_uitslag.xlsx",
+                    st.session_state.Pers_excel, "Persuitslag.xlsx")
+                    st.session_state.mail_verzonden = True
+                    st.success("Mail succesvol verzonden!")
                 
 
       
@@ -648,5 +645,6 @@ else:
         else:
             st.info("⏳ Wacht op alle juryleden, of vink 'forceren' aan om toch te berekenen.")
     
+
 
 
