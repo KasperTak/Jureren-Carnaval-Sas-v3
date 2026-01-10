@@ -60,25 +60,33 @@ client = gspread.authorize(creds)
 # sheet = client.open("Jury_beoordelingen_2026_v1").worksheet("Beoordeling")
 # sheet_top3 = client.open("Jury_beoordelingen_2026_v1").worksheet("LeutigsteDeelnemer")
 #%%
-def mail_excel(excel_bytes, filename):
+def mail_excel(excel_bytes_1, filename_1, excel_bytes_2, filename_2):
     msg = EmailMessage()
     msg["Subject"] = "Uitslag carnavalsoptocht Sas van Gent (Betekoppen) 2026"
     msg["From"] = st.secrets["email"]["from"]
     msg["To"] = st.secrets["email"]["to"]
+    msg["Cc"] = "kasper.tak@gmail.com" #"werloe96@zeelandnet.nl"
     
     msg.set_content(
         "Beste, \n\nAlle onderdelen zijn beoordeeld door de juryleden.\n"
-        "In de bijlage staat het Excelbestand met de uitgebreide uitslagen. Dit is overigens niet de uitslag voor de pers. \n\nGroeten,\nKasper Tak \n\nTelefoonnummer: 06 29927267")
-    msg.add_attachment(excel_bytes.getvalue(),
+        "\nIn de bijlage zijn twee Excelbestanden te vinden. Het rapport bevat te totale beoordeling. Het andere bestand is voor de pers geschikt."
+        "\nVia deze link kunt u terugkeren naar de app: https://jureren-carnaval-sas-v3-5hv5dkb6jabwo595qmmb6e.streamlit.app/"
+        "\n\nGroeten,\nKasper Tak \n\nTelefoonnummer: 06 29927267")
+    msg.add_attachment(excel_bytes_1.getvalue(),
                        maintype="application",
                        subtype="vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                       filename=filename)
+                       filename=filename_1)
+    
+    msg.add_attachment(excel_bytes_2.getvalue(),
+                       maintype="application",
+                       subtype="vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                       filename=filename_2)
     
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
         smtp.login(
             st.secrets["email"]["from"],
             st.secrets["email"]["app_password"])
-        smtp.send_message(msg)
+        smtp.send_message(msg, to_addrs=[msg["To"], msg["Cc"]])
 #%%
 def df_to_excel_colored(df):
     # Exporteer DataFrame tijdelijk naar BytesIO
@@ -629,7 +637,8 @@ else:
                     if st.session_state.mail_verzonden:
                         st.warning("Mail is al verzonden")
                     else:
-                        mail_excel(st.session_state.Rapport_excel, "Volledig_rapport_uitslag.xlsx")
+                        mail_excel(st.session_state.Rapport_excel, "Volledig_rapport_uitslag.xlsx",
+                                   st.session_state.Pers_excel, "Persuitslag.xlsx")
                         st.session_state.mail_verzonden = True
                         st.success("Mail succesvol verzonden!")
                 
