@@ -79,7 +79,7 @@ def df_to_excel_colored(df):
         bottom = Side(style="thin"))
     row = 1
     
-    for categorie, groep in df.groupby("Categorie"):
+    for categorie, groep in df.groupby("Categorie", sort=False):
     # Categorie-kop
         ws.cell(row=row, column = 1, value="Categorie").font = bold
         ws.cell(row=row, column = 1).fill = header_fill
@@ -584,6 +584,7 @@ else:
         else:
             st.info("⏳ Wacht op alle juryleden, of vink 'forceren' aan om toch te berekenen.")
     
+
 
 
 
