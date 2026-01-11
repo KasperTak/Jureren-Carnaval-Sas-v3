@@ -62,10 +62,10 @@ client = gspread.authorize(creds)
 #%%
 def mail_excel(excel_bytes_1, filename_1, excel_bytes_2, filename_2):
     msg = EmailMessage()
-    msg["Subject"] = "Uitslag carnavalsoptocht Sas van Gent (Betekoppen) 2026"
+    msg["Subject"] = "Uitslag carnavalsoptocht Sas van Gent (Betekoppen) 2026 [geautomatiseerde mail]"
     msg["From"] = st.secrets["email"]["from"]
     msg["To"] = st.secrets["email"]["to"]
-    msg["Cc"] = "kasper.tak@gmail.com", "werloe96@zeelandnet.nl"
+    msg["Cc"] = "kasper.tak12@gmail.com" #"werloe96@zeelandnet.nl"
     
     msg.set_content(
         "Beste, \n\nAlle onderdelen zijn beoordeeld door de juryleden.\n"
@@ -88,6 +88,85 @@ def mail_excel(excel_bytes_1, filename_1, excel_bytes_2, filename_2):
             st.secrets["email"]["app_password"])
         smtp.send_message(msg, to_addrs=[msg["To"], msg["Cc"]])
 #%%
+def df_to_excel_rapport(df):
+    output = BytesIO()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Uitslag"
+    
+    #Stijlen
+    header_fill = PatternFill("solid", fgColor="D6D1B0")
+    row_fill_1 = PatternFill('solid', fgColor= "C7D9ED")
+    row_fill_2 = PatternFill('solid', fgColor="E6EEF7")
+    bold = Font(bold=True)
+    center = Alignment(horizontal="center", vertical="center")
+    left = Alignment(horizontal="left", vertical="center")
+    
+    border = Border(
+        left = Side(style="thin"),
+        right = Side(style="thin"),
+        top = Side(style="thin"),
+        bottom = Side(style="thin"))
+    row = 1
+    
+    for categorie, groep in df.groupby("Categorie", sort=False):
+        ws.merge_cells(start_row=row, start_column=1, end_row = row, end_column=10)
+        cell = ws.cell(row=row, column=1, value = categorie)
+        cell.font = bold
+        cell.fill = header_fill
+        cell.alignment = center
+        cell.border = border
+        
+        for col in range(1,11):
+            ws.cell(row=row, column=col).border = border
+        row += 1 
+        
+        #subheaders
+        headers = ["Plaats", "Nr.", "Vereniging", "Titel", "Idee", "Bouwtechnisch", "Afwerking", "Carnavalesk", "Actie", "Totaal punten" ]
+    
+        for col, text in enumerate(headers, start=1):
+            c = ws.cell(row=row, column=col, value=text)
+            c.font = bold
+            c.alignment = center
+            c.fill = header_fill
+            c.border = border
+        row += 1
+        
+        # Data
+        fill_toggle = True
+        for _, r in groep.iterrows():
+            fill = row_fill_1 if fill_toggle else row_fill_2
+            fill_toggle = not fill_toggle
+            values = [
+                r["Plaats"],
+                r["Nr"],
+                r["Vereniging"],
+                r["Titel"],
+                r["Idee"],
+                r["Bouwtechnisch"],
+                r["Afwerking"],
+                r["Carnavalesk"],
+                r["Actie"],
+                r["Totaal punten"]
+                ]
+            for col, val in enumerate(values, start=1):
+                cell = ws.cell(row=row, column=col, value=val)
+                cell.fill = fill
+                cell.border = border
+                cell.alignment = center if col != 4 else left
+            row += 1
+        row += 1
+        
+    # kolombreedtes
+    widths =[8, 6, 25, 90, 8, 12, 10, 12, 8, 10]
+    for i, w in enumerate(widths, start=1):
+        ws.column_dimensions[chr(64+i)].width = w
+    
+    wb.save(output)
+    output.seek(0)                 
+    return output
+    
+
 def df_to_excel_colored(df):
     # Exporteer DataFrame tijdelijk naar BytesIO
     output = BytesIO()
@@ -155,7 +234,7 @@ def df_to_excel_colored(df):
     output.seek(0)
     
     return output
-#%% --- spul voor top-3 bepaling
+ #%% --- spul voor top-3 bepaling
 # Bestaande data ophalen
 @st.cache_data(ttl=300)
 def load_sheet_data(sheet_name):
@@ -584,6 +663,15 @@ else:
 
                 df_rapport_carnavalesk = df_uitslag_carnavalesk.copy()
                 df_rapport = pd.concat([df_rapport_categorien, df_rapport_carnavalesk], ignore_index=True)
+                
+                # Nr. toevoegen vanuit Programma Stoetopstellers 
+                df_nummers = programma_df.copy()
+                df_nummers = df_nummers.rename(columns={"titel": "Titel", 
+                                                        "vereniging": "Vereniging"})
+                df_rapport_met_nummers = df_rapport.merge(df_nummers[["nr..1", "Titel"]], on=["Titel"], how='left')
+                df_rapport_met_nummers = df_rapport_met_nummers.rename(columns={"nr..1": "Nr."})
+                kolommen_rapport_volgorde = ["Plaats", "Nr.", "Vereniging", "Titel", "Idee", "Bouwtechnisch", "Afwerking", "Carnavalesk", "Actie", "Totaal punten" ]
+                df_rapport_met_nummers = df_rapport_met_nummers[kolommen_rapport_volgorde]
                 # Uitslag/Rappot voor pers
                 top_3_algemeen = (df_rapport_categorien.groupby("Categorie", group_keys=False).head(3))
                 top_3_algemeen = top_3_algemeen[['Plaats', 'Categorie', 'Vereniging', 'Titel']]
@@ -594,7 +682,7 @@ else:
                 uitslag_top_3_pers = pd.concat([top_3_algemeen, top_3_carnavalesk], ignore_index=True)
                 
                 
-                st.session_state.df_rapport = df_rapport
+                st.session_state.df_rapport = df_rapport_met_nummers
                 st.session_state.df_pers = uitslag_top_3_pers
                 st.session_state.uitslag_berekend = True
                 
@@ -607,7 +695,7 @@ else:
                 st.success("Uitslag is berekend")
                 
                 if st.session_state.Rapport_excel is None:
-                    st.session_state.Rapport_excel = df_to_excel_colored(st.session_state.df_rapport)
+                    st.session_state.Rapport_excel = df_to_excel_rapport(st.session_state.df_rapport)
                 st.download_button("Download rapport naar Excel", data = st.session_state.Rapport_excel, file_name="uitslag_rapport.xlsx", 
                                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
             
@@ -635,7 +723,7 @@ else:
             if st.session_state.uitslag_berekend:
                 if st.button("Verstuur rapport via mail"):
                     mail_excel(st.session_state.Rapport_excel, "Volledig_rapport_uitslag.xlsx",
-                    st.session_state.Pers_excel, "Persuitslag.xlsx")
+                               st.session_state.Pers_excel, "Persuitslag.xlsx")
                     st.session_state.mail_verzonden = True
                     st.success("Mail succesvol verzonden!")
                 
@@ -645,7 +733,5 @@ else:
         else:
             st.info("⏳ Wacht op alle juryleden, of vink 'forceren' aan om toch te berekenen.")
     
-
-
 
 
