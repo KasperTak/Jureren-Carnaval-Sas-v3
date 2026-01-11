@@ -154,6 +154,9 @@ def df_to_excel_rapport(df):
                 cell.fill = fill
                 cell.border = border
                 cell.alignment = center if col != 4 else left
+                # waarden totale punten dikgedrukt
+                if col == 10:
+                    cell.font = Font(bold=True)
             row += 1
         row += 1
         
@@ -733,6 +736,7 @@ else:
         else:
             st.info("⏳ Wacht op alle juryleden, of vink 'forceren' aan om toch te berekenen.")
     
+
 
 
 
