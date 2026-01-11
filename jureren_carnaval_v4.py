@@ -139,7 +139,7 @@ def df_to_excel_rapport(df):
             fill_toggle = not fill_toggle
             values = [
                 r["Plaats"],
-                r["Nr"],
+                r["Nr."],
                 r["Vereniging"],
                 r["Titel"],
                 r["Idee"],
@@ -733,5 +733,6 @@ else:
         else:
             st.info("⏳ Wacht op alle juryleden, of vink 'forceren' aan om toch te berekenen.")
     
+
 
 
