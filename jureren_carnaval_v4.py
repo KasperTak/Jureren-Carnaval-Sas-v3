@@ -69,7 +69,7 @@ def mail_excel(excel_bytes_1, filename_1, excel_bytes_2, filename_2):
     
     msg.set_content(
         "Beste, \n\nAlle onderdelen zijn beoordeeld door de juryleden.\n"
-        "\nIn de bijlage zijn twee Excelbestanden te vinden. Het rapport bevat te totale beoordeling. Het andere bestand is voor de pers geschikt."
+        "\nIn de bijlage zijn twee Excelbestanden te vinden. Het rapport bevat de totale, gedetailleerde beoordeling. Het andere bestand is geschikt voor de pers."
         "\nVia deze link kunt u terugkeren naar de app: https://jureren-carnaval-sas-v3-5hv5dkb6jabwo595qmmb6e.streamlit.app/"
         "\n\nGroeten,\nKasper Tak \n\nTelefoonnummer: 06 29927267")
     msg.add_attachment(excel_bytes_1.getvalue(),
@@ -733,6 +733,5 @@ else:
         else:
             st.info("⏳ Wacht op alle juryleden, of vink 'forceren' aan om toch te berekenen.")
     
-
 
 
