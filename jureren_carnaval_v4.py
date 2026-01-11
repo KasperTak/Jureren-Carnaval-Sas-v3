@@ -670,7 +670,7 @@ else:
                                                         "vereniging": "Vereniging"})
                 df_rapport_met_nummers = df_rapport.merge(df_nummers[["nr..1", "Titel"]], on=["Titel"], how='left')
                 df_rapport_met_nummers = df_rapport_met_nummers.rename(columns={"nr..1": "Nr."})
-                kolommen_rapport_volgorde = ["Plaats", "Nr.", "Vereniging", "Titel", "Idee", "Bouwtechnisch", "Afwerking", "Carnavalesk", "Actie", "Totaal punten" ]
+                kolommen_rapport_volgorde = ["Plaats", "Nr.", "Categorie", "Vereniging", "Titel", "Idee", "Bouwtechnisch", "Afwerking", "Carnavalesk", "Actie", "Totaal punten" ]
                 df_rapport_met_nummers = df_rapport_met_nummers[kolommen_rapport_volgorde]
                 # Uitslag/Rappot voor pers
                 top_3_algemeen = (df_rapport_categorien.groupby("Categorie", group_keys=False).head(3))
